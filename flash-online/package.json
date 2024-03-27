@@ -13,7 +13,9 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@jaames/iro": "^5.5.2",
     "@opentiny/vue": "^3.14.0",
+    "mqtt": "^5.5.0",
     "vue": "^3.4.21",
     "vue-router": "^4.3.0"
   },
