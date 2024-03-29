@@ -3,12 +3,15 @@ import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import autoImportPlugin from '@opentiny/unplugin-tiny-vue'
+import { visualizer } from "rollup-plugin-visualizer";
+
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     vue(),
-    autoImportPlugin()
+    autoImportPlugin(),
+    visualizer()
   ],
   resolve: {
     alias: {
@@ -17,5 +20,9 @@ export default defineConfig({
   },
   define: {
     'process.env': { ...process.env }
+  }, build: {
+    rollupOptions: {
+      external: ["@jaames/iro/dist/ColorPicker"]
+    }
   }
 })

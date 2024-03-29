@@ -1,10 +1,15 @@
 <script setup lang="ts">
-import { Form as TinyForm, FormItem as TinyFormItem, Input as TinyInput } from '@opentiny/vue'
-import { Collapse as TinyCollapse, CollapseItem as TinyCollapseItem } from '@opentiny/vue'
-import { Button as TinyButton, Switch as TinySwitch } from '@opentiny/vue'
-import { onMounted, onUnmounted, reactive, ref, watch } from 'vue'
+import {
+  Button as TinyButton,
+  Collapse as TinyCollapse,
+  CollapseItem as TinyCollapseItem,
+  Form as TinyForm,
+  FormItem as TinyFormItem,
+  Input as TinyInput,
+  Switch as TinySwitch
+} from '@opentiny/vue'
+import { computed, reactive, ref, watch } from 'vue'
 import mqtt from 'mqtt'
-import MqttClient from 'mqtt/src/lib/client'
 import ColorPicker from '@/components/ColorPicker.vue'
 
 const storageKey = 'LOVE-LAMP-CONTROL-MQTT-CONFIG'
@@ -36,7 +41,7 @@ const color = ref('0xffffff')
 const colorPickerWidth = window.screen.width > 400 ? 350 : window.screen.width * 0.6
 
 
-let client: MqttClient = null
+let client: any = null
 
 function connect() {
   client?.end()
@@ -45,7 +50,6 @@ function connect() {
   const url = mqttConfig.mqtt_ws
 
   client = mqtt.connect(url, {
-    log: console.log.bind(console),
     keepalive: 30,
     clientId: 'love-lamp-control',
     username: mqttConfig.username,
@@ -79,16 +83,23 @@ function connect() {
 
 const ledSwitch = ref(true)
 
-function onSwitchChange() {
-  if (ledSwitch.value) {
-    client.publish('device/love-lamp/led', 'on')
-  } else {
-    client.publish('device/love-lamp/led', 'off')
+
+const baseControl = computed(() => {
+  return {
+    state: ledSwitch.value ? 1 : 0,
+    r: parseInt(color.value.substring(1, 3), 16),
+    g: parseInt(color.value.substring(3, 5), 16),
+    b: parseInt(color.value.substring(5, 7), 16)
   }
+})
+
+function onSwitchChange() {
+  console.log(baseControl.value)
+  client.publish('device/love-lamp/control', JSON.stringify(baseControl.value))
 }
 
 watch(color, async (newColor, oldColor) => {
-  client.publish('device/love-lamp/color', newColor)
+  client.publish('device/love-lamp/control', JSON.stringify(baseControl.value))
 })
 </script>
 

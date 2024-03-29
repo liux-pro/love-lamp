@@ -15,7 +15,8 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onBeforeUnmount, onMounted, PropType, ref, watch } from 'vue'
+import type { PropType } from 'vue'
+import { computed, defineComponent, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import iro from '@jaames/iro'
 import { IroColor } from '@irojs/iro-core'
 import { IroColorPicker } from '@jaames/iro/dist/ColorPicker'
@@ -25,12 +26,12 @@ export default defineComponent({
   props: {
     modelValue: {
       type: String as PropType<string>,
-      default: '#ffffff',
+      default: '#ffffff'
     },
     width: {
       type: Number as PropType<number>,
-      default: 200,
-    },
+      default: 200
+    }
   },
   setup(props, { emit }) {
     const container = ref<null | HTMLElement>(null)
@@ -47,16 +48,16 @@ export default defineComponent({
         layoutDirection: 'vertical',
         layout: [
           {
-            component: iro.ui.Wheel,
+            component: iro.ui.Wheel
           },
           {
             component: iro.ui.Slider,
             options: {
               id: 'hue-slider',
-              sliderType: 'value',
-            },
-          },
-        ],
+              sliderType: 'value'
+            }
+          }
+        ]
       })
       picker.value?.on('input:end', onPickerInputEnd)
       picker.value?.on('input:change', onPickerInputChange)
@@ -71,7 +72,7 @@ export default defineComponent({
       return /^#[0-9A-F]{6}$/i.test(hexString)
     }
 
-    const onInputChange = (event: InputEvent) => {
+    const onInputChange = (event: Event) => {
       const target = event.target as HTMLInputElement
       const value = target.value
       if (isHex(value)) {
@@ -96,14 +97,14 @@ export default defineComponent({
         if (picker.value?.color) {
           picker.value.color.hexString = value
         }
-      },
+      }
     )
 
     return {
       container,
       color,
-      onInputChange,
+      onInputChange
     }
-  },
+  }
 })
 </script>
