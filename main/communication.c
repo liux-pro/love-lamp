@@ -1,4 +1,4 @@
-#include "Communication.h"
+#include "communication.h"
 #include "cJSON.h"
 
 bool parseBaseControl(const char *jsonData, size_t jsonDataLen, BaseControl *baseControl) {
