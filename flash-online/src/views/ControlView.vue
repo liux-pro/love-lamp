@@ -35,7 +35,6 @@ function saveConfig() {
 }
 
 
-const messages = ref([])
 const connected = ref(false)
 const color = ref('0xffffff')
 const colorPickerWidth = window.screen.width > 400 ? 350 : window.screen.width * 0.6
