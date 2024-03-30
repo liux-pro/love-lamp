@@ -15,9 +15,12 @@
   "dependencies": {
     "@jaames/iro": "^5.5.2",
     "@opentiny/vue": "^3.14.0",
+    "@types/w3c-web-serial": "^1.0.6",
+    "esptool-js": "^0.4.1",
     "mqtt": "^5.5.0",
     "vue": "^3.4.21",
-    "vue-router": "^4.3.0"
+    "vue-router": "^4.3.0",
+    "xterm": "^3.14.5"
   },
   "devDependencies": {
     "@opentiny/unplugin-tiny-vue": "^0.0.1",

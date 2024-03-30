@@ -29,11 +29,11 @@ static char *TOPIC_CONTROL = "device/love-lamp/control";
 static touch_slider_handle_t slider_handle; //Touch slider handle
 
 static const touch_pad_t channel_array[TOUCH_SLIDER_CHANNEL_NUM] = { //Touch slider channels array
-        TOUCH_PAD_NUM1,
-        TOUCH_PAD_NUM2,
-        TOUCH_PAD_NUM14,
+        TOUCH_PAD_NUM12,
         TOUCH_PAD_NUM13,
-        TOUCH_PAD_NUM12
+        TOUCH_PAD_NUM14,
+        TOUCH_PAD_NUM2,
+        TOUCH_PAD_NUM1
 };
 
 /**
@@ -49,8 +49,6 @@ static const float channel_sens_array[TOUCH_SLIDER_CHANNEL_NUM] = {
         0.379 / 3,
         0.507 / 3};
 
-
-led_strip_handle_t led_strip;
 
 /* Slider event handler task */
 static void slider_handler_task(void *arg) {
@@ -69,7 +67,8 @@ static void slider_handler_task(void *arg) {
             } else if (slider_message->event == TOUCH_SLIDER_EVT_ON_RELEASE) {
                 ESP_LOGI(TAG, "Slider Release, position: %"PRIu32, slider_message->position);
             } else if (slider_message->event == TOUCH_SLIDER_EVT_ON_CALCULATION) {
-//                ESP_LOGI(TAG, "Slider Calculate, position: %"PRIu32, slider_message->position);
+                ESP_LOGI(TAG, "Slider Calculate, position: %"PRIu32, slider_message->position);
+                led_set_all_hsv(slider_message->position, 255, 255);
             }
         }
     }
@@ -113,7 +112,7 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
         case MQTT_EVENT_DATA:
             ESP_LOGI(TAG, "MQTT_EVENT_DATA");
             printf("TOPIC=%.*s\r\n", event->topic_len, event->topic);
-            if (event->data_len>0){
+            if (event->data_len > 0) {
                 printf("DATA=%.*s\r\n", event->data_len, event->data);
             } else {
                 printf("DATA=NULL\r\n");
@@ -124,15 +123,9 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
                 BaseControl baseControl;
                 if (parseBaseControl(event->data, event->data_len, &baseControl)) {
                     if (baseControl.state == LED_STATUS_ON) {
-                        for (int i = 0; i < LED_STRIP_LED_NUMBERS; ++i) {
-                            led_strip_set_pixel(led_strip, i, baseControl.r, baseControl.g, baseControl.b);
-                        }
-                        led_strip_refresh(led_strip);
+                        led_set_all(baseControl.r, baseControl.g, baseControl.b);
                     } else {
-                        for (int i = 0; i < LED_STRIP_LED_NUMBERS; ++i) {
-                            led_strip_set_pixel(led_strip, i, 0, 0, 0);
-                        }
-                        led_strip_refresh(led_strip);
+                        led_set_all(0, 0, 0);
                     }
                 }
 
@@ -158,9 +151,10 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
 }
 
 
-extern const uint8_t server_root_cert_pem_start[] asm("_binary_emqxsl_ca_crt_start");
 
 static void mqtt_app_start(void) {
+    extern const uint8_t server_root_cert_pem_start[] asm("_binary_emqxsl_ca_crt_start");
+
     const esp_mqtt_client_config_t mqtt_cfg = {
             .broker = {
                     .address.uri = "mqtts://b5091a39.ala.cn-hangzhou.emqxsl.cn:8883",
@@ -170,7 +164,7 @@ static void mqtt_app_start(void) {
                     .client_id = "love-lamp",
                     .username = "love-lamp",
                     .authentication = {
-                            .password = "asd123456",
+                            .password = "?????",
                     }
             }
     };
@@ -183,15 +177,7 @@ static void mqtt_app_start(void) {
 }
 
 
-void app_main(void) {
-    wifi_connect();
-    mqtt_app_start();
-    led_strip = led_init();
-
-
-
-
-
+void touch_init() {
     /* Initialize Touch Element library */
     touch_elem_global_config_t global_config = TOUCH_ELEM_GLOBAL_DEFAULT_CONFIG();
     ESP_ERROR_CHECK(touch_element_install(&global_config));
@@ -205,7 +191,7 @@ void app_main(void) {
             .channel_array = channel_array,
             .sensitivity_array = channel_sens_array,
             .channel_num = (sizeof(channel_array) / sizeof(channel_array[0])),
-            .position_range = 101
+            .position_range = 255
     };
     ESP_ERROR_CHECK(touch_slider_create(&slider_config, &slider_handle));
     /* Subscribe touch slider events (On Press, On Release, On Calculation) */
@@ -221,4 +207,11 @@ void app_main(void) {
     ESP_LOGI(TAG, "Touch slider created");
     touch_element_start();
     ESP_LOGI(TAG, "Touch element library start");
+}
+
+void app_main(void) {
+    wifi_connect();
+    led_init();
+    touch_init();
+    mqtt_app_start();
 }

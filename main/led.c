@@ -4,11 +4,11 @@
 #include "led.h"
 
 
-
 static const char *TAG = "led strip";
+led_strip_handle_t led;
 
 
-led_strip_handle_t led_init(void) {
+void led_init(void) {
     // LED strip general initialization, according to your led board design
     led_strip_config_t strip_config = {
             .strip_gpio_num = LED_STRIP_RGB_GPIO,   // The GPIO that connected to the LED strip's data line
@@ -25,9 +25,20 @@ led_strip_handle_t led_init(void) {
             .spi_bus = SPI3_HOST,           // SPI bus ID
     };
 
-    // LED Strip object handle
-    led_strip_handle_t led_strip;
-    ESP_ERROR_CHECK(led_strip_new_spi_device(&strip_config, &spi_config, &led_strip));
+    ESP_ERROR_CHECK(led_strip_new_spi_device(&strip_config, &spi_config, &led));
     ESP_LOGI(TAG, "Created LED strip object with SPI backend");
-    return led_strip;
+}
+
+void led_set_all(uint8_t r, uint8_t g, uint8_t b) {
+    for (int i = 0; i < LED_STRIP_LED_NUMBERS; ++i) {
+        led_strip_set_pixel(led, i, r, g, b);
+    }
+    led_strip_refresh(led);
+}
+
+void led_set_all_hsv(uint16_t h, uint8_t s, uint8_t v) {
+    for (int i = 0; i < LED_STRIP_LED_NUMBERS; ++i) {
+        led_strip_set_pixel_hsv(led, i, h, s, v);
+    }
+    led_strip_refresh(led);
 }
