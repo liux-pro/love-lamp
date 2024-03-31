@@ -15,7 +15,7 @@ COPY server/requirements.txt /app/requirements.txt
 
 # 安装 Nginx 和 Python3
 RUN apk update && \
-    apk add nginx python3
+    apk add nginx python3 py3-ppip
 
 RUN pip3 install -r requiremens.txt
 
