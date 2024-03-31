@@ -19,7 +19,6 @@ import type { PropType } from 'vue'
 import { computed, defineComponent, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import iro from '@jaames/iro'
 import { IroColor } from '@irojs/iro-core'
-import { IroColorPicker } from '@jaames/iro/dist/ColorPicker'
 
 export default defineComponent({
   name: 'ColorPicker',
@@ -35,7 +34,7 @@ export default defineComponent({
   },
   setup(props, { emit }) {
     const container = ref<null | HTMLElement>(null)
-    const picker = ref<null | IroColorPicker>(null)
+    const picker = ref()
     const color = ref<string>(props.modelValue)
 
     onMounted(() => {
