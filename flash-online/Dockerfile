@@ -16,7 +16,7 @@ COPY server/requirements.txt /app/requirements.txt
 # 安装 Nginx 和 Python3
 RUN apk update && apk add nginx
 
-RUN pip install --user -r /app/requiremens.txt
+RUN pip install -r /app/requirements.txt
 
 
 # 暴露 8080 端口
