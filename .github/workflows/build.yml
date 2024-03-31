@@ -18,8 +18,9 @@ jobs:
         run: sudo mv build/esp32s3.bin flash-online/public/esp32s3.bin
       - name: build web
         run: cd flash-online && npm install && npm run build
+      - name: build web docker
+        run: cd flash-online && docker build -t flash-online .
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: esp32s3.bin
-          path: ./build/esp32s3.bin
+          path: ./flash-online/dist
