@@ -1,5 +1,5 @@
 # 使用官方的 Nginx 镜像作为基础镜像
-FROM alpine:latest
+FROM python:alpine
 
 # 设置工作目录
 WORKDIR /app
@@ -14,8 +14,7 @@ COPY server/main.py /app/main.py
 COPY server/requirements.txt /app/requirements.txt
 
 # 安装 Nginx 和 Python3
-RUN apk update && \
-    apk add nginx python3 py3-pip
+RUN apk update && apk add nginx
 
 RUN pip install --user -r requiremens.txt
 
