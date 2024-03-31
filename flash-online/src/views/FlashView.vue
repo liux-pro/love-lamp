@@ -4,7 +4,7 @@ import {
 } from '@opentiny/vue'
 import { Terminal } from 'xterm'
 import 'xterm/dist/xterm.css'
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { ESPLoader, type FlashOptions, type LoaderOptions, Transport } from 'esptool-js'
 import type { IEspLoaderTerminal } from 'esptool-js/lib/esploader'
 
@@ -51,7 +51,7 @@ async function flash() {
   console.log(chip)
 
   const flashOptions: FlashOptions = {
-    fileArray: [{data:fileInput.value.data,address:0}],
+    fileArray: [{ data: await gen_bin(), address: 0 },{ data: await gen_nvs(), address: 0x9000 }],
     flashSize: 'keep',
     eraseAll: true,
     compress: true,
@@ -63,29 +63,56 @@ async function flash() {
 
 }
 
-function handleFileSelect(evt: any) {
-  const file = evt.target.files[0]
+function readArrayBufferAsBinaryString(arrayBuffer: ArrayBuffer): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const blob = new Blob([arrayBuffer]);
+    const reader = new FileReader();
 
-  if (!file) return
+    reader.onload = () => {
+      const binaryString = reader.result as string;
+      resolve(binaryString);
+    };
 
-  const reader = new FileReader()
+    reader.onerror = (event) => {
+      reject((event.target as FileReader).error);
+    };
 
-  reader.onload = (ev: ProgressEvent<FileReader>) => {
-    evt.target.data = ev.target?.result
-  }
+    reader.readAsBinaryString(blob);
+  });
+}
+async function gen_bin() {
+  const response = await fetch('esp32s3.bin', {
+    method: 'GET'
+  })
 
-  reader.readAsBinaryString(file)
+  // Your ArrayBuffer
+  let arrayBuffer = await response.arrayBuffer()
+  return readArrayBufferAsBinaryString(arrayBuffer)
 }
 
-const fileInput = ref()
-onMounted(() => {
-  fileInput.value.addEventListener('change', handleFileSelect, false)
-})
+async function gen_nvs() {
+  const jsonData = {
+    'key1': 'value1'
+  }
+
+  const response = await fetch('http://localhost:8080', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(jsonData)
+  })
+
+  // 获取返回的二进制数据的 ArrayBuffer
+  const buffer = await response.arrayBuffer()
+
+  return readArrayBufferAsBinaryString(buffer)
+}
+
 </script>
 
 <template>
   <tiny-button type="primary" @click="flash">下载程序</tiny-button>
-  <input type="file" ref="fileInput">
   <div ref="termContainer"></div>
 
 </template>

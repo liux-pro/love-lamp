@@ -7,6 +7,8 @@
 static const char *TAG = "led strip";
 led_strip_handle_t led;
 
+BaseControl baseControl;
+
 
 void led_init(void) {
     // LED strip general initialization, according to your led board design

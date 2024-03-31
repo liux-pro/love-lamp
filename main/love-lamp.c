@@ -8,17 +8,19 @@
 #include <esp_event.h>
 #include <esp_netif.h>
 #include <cJSON.h>
+#include <nvs.h>
+#include <esp_timer.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "led_strip.h"
 #include "touch_element/touch_slider.h"
 #include "esp_log.h"
-#include "led.h"
 #include "wifi_utils.h"
 #include "esp_log.h"
 #include "mqtt_client.h"
 #include "esp_tls.h"
 #include "communication.h"
+#include "led.h"
 #include "utils.h"
 
 
@@ -36,6 +38,9 @@ static const touch_pad_t channel_array[TOUCH_SLIDER_CHANNEL_NUM] = { //Touch sli
         TOUCH_PAD_NUM1
 };
 
+//单位是微秒
+#define LONG_PRESS_THRESHOLD (1000*1000)
+
 /**
  * Using finger slide from slider's beginning to the ending, and output the RAW channel signal, then calculate all the
  * channels sensitivity of the slider, and you can decrease or increase the detection sensitivity by adjusting the threshold divider
@@ -52,6 +57,9 @@ static const float channel_sens_array[TOUCH_SLIDER_CHANNEL_NUM] = {
 
 /* Slider event handler task */
 static void slider_handler_task(void *arg) {
+    static uint32_t  pressStartTime = 0;
+
+
     (void) arg; //Unused
     touch_elem_message_t element_message;
     while (1) {
@@ -64,11 +72,27 @@ static void slider_handler_task(void *arg) {
             const touch_slider_message_t *slider_message = touch_slider_get_message(&element_message);
             if (slider_message->event == TOUCH_SLIDER_EVT_ON_PRESS) {
                 ESP_LOGI(TAG, "Slider Press, position: %"PRIu32, slider_message->position);
+                pressStartTime =  esp_timer_get_time();
             } else if (slider_message->event == TOUCH_SLIDER_EVT_ON_RELEASE) {
                 ESP_LOGI(TAG, "Slider Release, position: %"PRIu32, slider_message->position);
+                if (esp_timer_get_time() - pressStartTime <= LONG_PRESS_THRESHOLD) {
+                    printf("短按\n");
+                    if (baseControl.state == LED_STATUS_OFF){
+                        led_set_all(baseControl.r, baseControl.g, baseControl.b);
+                        baseControl.state = LED_STATUS_ON;
+                    } else{
+                        led_set_all(0, 0, 0);
+                        baseControl.state = LED_STATUS_OFF;
+                    }
+
+                }
             } else if (slider_message->event == TOUCH_SLIDER_EVT_ON_CALCULATION) {
                 ESP_LOGI(TAG, "Slider Calculate, position: %"PRIu32, slider_message->position);
-                led_set_all_hsv(slider_message->position, 255, 255);
+                  //进入长按状态
+                if (esp_timer_get_time() - pressStartTime > LONG_PRESS_THRESHOLD) {
+//                    led_set_all_hsv(slider_message->position, 255, 255);
+                    led_set_all_hsv(slider_message->position, 255, 255);
+                }
             }
         }
     }
@@ -120,7 +144,6 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
             }
 
             if (stringCompare(event->topic, event->topic_len, TOPIC_CONTROL, strlen(TOPIC_CONTROL))) {
-                BaseControl baseControl;
                 if (parseBaseControl(event->data, event->data_len, &baseControl)) {
                     if (baseControl.state == LED_STATUS_ON) {
                         led_set_all(baseControl.r, baseControl.g, baseControl.b);
@@ -209,9 +232,29 @@ void touch_init() {
     ESP_LOGI(TAG, "Touch element library start");
 }
 
+
+//void test_read_nvs() {
+//    nvs_handle_t my_handle;
+//    esp_err_t err;
+//    nvs_open("storage", NVS_READONLY, &my_handle);
+//    size_t required_size;
+//    nvs_get_str(my_handle, "key1", NULL, &required_size);
+//    char* server_name = malloc(required_size);
+//    nvs_get_str(my_handle, "key1", server_name, &required_size);
+//    while (1){
+//        ESP_LOGI(TAG, "server_name: %s", server_name);
+//        vTaskDelay(2000 / portTICK_PERIOD_MS);
+//    }
+//
+//}
 void app_main(void) {
+    baseControl.r=50;
+    baseControl.g=50;
+    baseControl.b=50;
     wifi_connect();
     led_init();
     touch_init();
     mqtt_app_start();
+//    xTaskCreate(&test_read_nvs, "test_read_nvs", 4 * 1024, NULL, 5, NULL);
+
 }

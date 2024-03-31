@@ -1,10 +1,12 @@
+#pragma once
 #include "led_strip.h"
+#include "communication.h"
 
 #define LED_STRIP_RGB_GPIO  15
 #define LED_STRIP_LED_NUMBERS 10
 
 extern led_strip_handle_t led;
-
+extern BaseControl baseControl;
 /*
  * 初始化那8个ws2812
  * 底层由espressif/led_strip实现，
