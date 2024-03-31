@@ -1,13 +1,23 @@
 <template>
+  <div style="padding-bottom: 10px">
+    <tiny-button>
+      <router-link to="/">控制页</router-link>
+    </tiny-button>
+    <tiny-button>
+      <router-link to="/flash">下载页</router-link>
+    </tiny-button>
+  </div>
   <router-view></router-view>
 
-  <router-link to="/">Go to Home</router-link>
-  <router-link to="/flash">Go to About</router-link>
+
 
 </template>
 
 <script setup>
-import {RouterView,RouterLink} from 'vue-router'
+import {
+  Button as TinyButton
+} from '@opentiny/vue'
+import { RouterView, RouterLink } from 'vue-router'
 
 </script>
 

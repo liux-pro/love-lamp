@@ -7,8 +7,8 @@
 #include "nvs_flash.h" //non volatile storage
 #include "wifi_utils.h"
 
-const char *ssid = "River";
-const char *pass = "asd123456";
+//const char *ssid = "River";
+//const char *pass = "asd123456";
 
 /* The event group allows multiple bits for each event, but we only care about two events:
  * - we are connected to the AP with an IP
@@ -74,8 +74,19 @@ void wifi_init_sta() {
                                                         &instance_got_ip));
 
     wifi_config_t wifi_config = {0};
-    strcpy((char *) wifi_config.sta.ssid, ssid);
-    strcpy((char *) wifi_config.sta.password, pass);
+
+    //从nvs读取wifi信息
+    nvs_handle_t my_handle;
+    nvs_open("storage", NVS_READONLY, &my_handle);
+    size_t size = 0;
+    nvs_get_str(my_handle, "wifi_ssid", NULL, &size);
+    ESP_ERROR_CHECK(nvs_get_str(my_handle, "wifi_ssid", (char *) wifi_config.sta.ssid, &size));
+    nvs_get_str(my_handle, "wifi_password", NULL, &size);
+    ESP_ERROR_CHECK(nvs_get_str(my_handle, "wifi_password", (char *) wifi_config.sta.password, &size));
+    nvs_close(my_handle);
+//    strcpy((char *) wifi_config.sta.ssid, ssid);
+//    strcpy((char *) wifi_config.sta.password, pass);
+
 
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA) );
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config) );
@@ -94,10 +105,10 @@ void wifi_init_sta() {
      * happened. */
     if (bits & WIFI_CONNECTED_BIT) {
         ESP_LOGI(TAG, "connected to ap SSID:%s password:%s",
-                 ssid, pass);
+                 wifi_config.sta.ssid, wifi_config.sta.password);
     } else if (bits & WIFI_FAIL_BIT) {
         ESP_LOGI(TAG, "Failed to connect to SSID:%s, password:%s",
-                 ssid, pass);
+                 wifi_config.sta.ssid, wifi_config.sta.password);
     } else {
         ESP_LOGE(TAG, "UNEXPECTED EVENT");
     }

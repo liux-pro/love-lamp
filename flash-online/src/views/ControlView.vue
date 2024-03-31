@@ -36,7 +36,7 @@ function saveConfig() {
 
 
 const connected = ref(false)
-const color = ref('0xffffff')
+const color = ref('#ffffff')
 const colorPickerWidth = window.screen.width > 400 ? 350 : window.screen.width * 0.6
 
 
@@ -80,7 +80,7 @@ function connect() {
   })
 }
 
-const ledSwitch = ref(true)
+const ledSwitch = ref(false)
 
 
 const baseControl = computed(() => {
@@ -107,7 +107,7 @@ watch(color, async (newColor, oldColor) => {
     <tiny-collapse class="demo-collapse-wrap" v-model="activeNames">
       <tiny-collapse-item title="" name="config">
         <tiny-form ref="ruleFormRef" :model="mqttConfig" label-position="left" label-align label-width="100px">
-          <tiny-form-item label="MQTT地址" prop="username" required>
+          <tiny-form-item label="MQTT地址" prop="mqtt_ws" required>
             <tiny-input v-model="mqttConfig.mqtt_ws">
               <template #prepend>WebSocket</template>
             </tiny-input>

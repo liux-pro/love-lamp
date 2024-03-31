@@ -178,19 +178,46 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
 static void mqtt_app_start(void) {
     extern const uint8_t server_root_cert_pem_start[] asm("_binary_emqxsl_ca_crt_start");
 
+
+    nvs_handle_t my_handle;
+    nvs_open("storage", NVS_READONLY, &my_handle);
+    size_t size = 0;
+
+
+    nvs_get_str(my_handle, "mqtt_uri", NULL, &size);
+    char* mqtt_uri = (char*)malloc(size);
+    ESP_ERROR_CHECK(nvs_get_str(my_handle, "mqtt_uri", (char *) mqtt_uri, &size));
+
+    nvs_get_str(my_handle, "mqtt_username", NULL, &size);
+    char* mqtt_username = (char*)malloc(size);
+    ESP_ERROR_CHECK(nvs_get_str(my_handle, "mqtt_username", (char *) mqtt_username, &size));
+
+    nvs_get_str(my_handle, "mqtt_password", NULL, &size);
+    char* mqtt_password = (char*)malloc(size);
+    ESP_ERROR_CHECK(nvs_get_str(my_handle, "mqtt_password", (char *) mqtt_password, &size));
+    nvs_close(my_handle);
+
+
+
+    //打印配置信息
+    ESP_LOGI(TAG, "mqtt_uri: %s", mqtt_uri);
+    ESP_LOGI(TAG, "mqtt_username: %s", mqtt_username);
+    ESP_LOGI(TAG, "mqtt_password: %s", mqtt_password);
+
     const esp_mqtt_client_config_t mqtt_cfg = {
             .broker = {
-                    .address.uri = "mqtts://b5091a39.ala.cn-hangzhou.emqxsl.cn:8883",
+                    .address.uri = mqtt_uri,
                     .verification.certificate = (const char *) server_root_cert_pem_start
             },
             .credentials ={
-                    .client_id = "love-lamp",
-                    .username = "love-lamp",
+                    .client_id = mqtt_username,
+                    .username = mqtt_username,
                     .authentication = {
-                            .password = "?????",
+                            .password = mqtt_password,
                     }
             }
     };
+
 
     ESP_LOGI(TAG, "[APP] Free memory: %" PRIu32 " bytes", esp_get_free_heap_size());
     esp_mqtt_client_handle_t client = esp_mqtt_client_init(&mqtt_cfg);
@@ -233,20 +260,12 @@ void touch_init() {
 }
 
 
-//void test_read_nvs() {
-//    nvs_handle_t my_handle;
-//    esp_err_t err;
-//    nvs_open("storage", NVS_READONLY, &my_handle);
-//    size_t required_size;
-//    nvs_get_str(my_handle, "key1", NULL, &required_size);
-//    char* server_name = malloc(required_size);
-//    nvs_get_str(my_handle, "key1", server_name, &required_size);
-//    while (1){
-//        ESP_LOGI(TAG, "server_name: %s", server_name);
-//        vTaskDelay(2000 / portTICK_PERIOD_MS);
-//    }
-//
-//}
+
+
+void test_read_nvs() {
+    nvs_handle_t my_handle;
+    nvs_open("storage", NVS_READONLY, &my_handle);
+}
 void app_main(void) {
     baseControl.r=50;
     baseControl.g=50;
