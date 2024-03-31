@@ -23,4 +23,4 @@ RUN pip install -r /app/requirements.txt
 EXPOSE 8080
 
 # 启动 Nginx
-CMD ["nginx", "-g", "daemon off;"]
+CMD nginx -g 'daemon off;' & python /app/main.py &
