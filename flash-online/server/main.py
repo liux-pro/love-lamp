@@ -41,7 +41,7 @@ class BinaryDataHandler(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps({'error': 'Invalid JSON'}).encode())
 
 
-def run_server(port=8080):
+def run_server(port=8081):
     server_address = ('', port)
     httpd = HTTPServer(server_address, BinaryDataHandler)
     print(f'Server is running on port {port}')
