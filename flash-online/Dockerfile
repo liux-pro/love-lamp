@@ -13,10 +13,10 @@ COPY server/nginx.conf /etc/nginx/nginx.conf
 COPY server/main.py /app/main.py
 COPY server/requirements.txt /app/requirements.txt
 
-# 安装 Nginx 和 Python3
-RUN apk update && apk add nginx
+# 安装 Nginx
+RUN apk update && apk add --no-cache nginx
 
-RUN pip install -r /app/requirements.txt
+RUN pip install --no-cache-dir -r /app/requirements.txt
 
 
 # 暴露 8080 端口
