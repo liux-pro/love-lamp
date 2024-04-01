@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { Button as TinyButton, Form as TinyForm, FormItem as TinyFormItem, Input as TinyInput } from '@opentiny/vue'
-import { Terminal } from 'xterm'
+import {Button as TinyButton, Form as TinyForm, FormItem as TinyFormItem, Input as TinyInput} from '@opentiny/vue'
+import {Terminal} from 'xterm'
 import 'xterm/dist/xterm.css'
-import { reactive, ref } from 'vue'
-import { ESPLoader, type FlashOptions, type LoaderOptions, Transport } from 'esptool-js'
-import type { IEspLoaderTerminal } from 'esptool-js/lib/esploader'
+import {reactive, ref} from 'vue'
+import {ESPLoader, type FlashOptions, type LoaderOptions, Transport} from 'esptool-js'
+import type {IEspLoaderTerminal} from 'esptool-js/lib/esploader'
 
 
 defineProps<{ msg: string }>()
@@ -49,7 +49,7 @@ async function flash() {
   }
 
   const portFilters: { usbVendorId?: number | undefined, usbProductId?: number | undefined }[] = []
-  const device = await navigator.serial.requestPort({ filters: portFilters })
+  const device = await navigator.serial.requestPort({filters: portFilters})
   transport = new Transport(device, true)
   const loadOptions = {
     transport,
@@ -62,7 +62,7 @@ async function flash() {
   console.log(chip)
 
   const flashOptions: FlashOptions = {
-    fileArray: [{ data: await gen_bin(), address: 0 }, { data: await gen_nvs(), address: 0x9000 }],
+    fileArray: [{data: await gen_bin(), address: 0}, {data: await gen_nvs(), address: 0x9000}],
     flashSize: 'keep',
     eraseAll: true,
     compress: true,
@@ -104,7 +104,7 @@ async function gen_bin() {
 
 async function gen_nvs() {
 
-  const response = await fetch('http://localhost:8080', {
+  const response = await fetch(import.meta.env.PROD ? "api" : 'http://localhost:8080', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -120,11 +120,11 @@ async function gen_nvs() {
 
 const ruleFormRef = ref()
 const rules = ref({
-  wifi_ssid: [{ required: true, message: '必填', trigger: 'blur' }],
-  wifi_password: [{ required: true, message: '必填', trigger: 'blur' }],
-  mqtt_uri: [{ required: true, message: '必填', trigger: 'blur' }],
-  mqtt_username: [{ required: true, message: '必填', trigger: 'blur' }],
-  mqtt_password: [{ required: true, message: '必填', trigger: 'blur' }]
+  wifi_ssid: [{required: true, message: '必填', trigger: 'blur'}],
+  wifi_password: [{required: true, message: '必填', trigger: 'blur'}],
+  mqtt_uri: [{required: true, message: '必填', trigger: 'blur'}],
+  mqtt_username: [{required: true, message: '必填', trigger: 'blur'}],
+  mqtt_password: [{required: true, message: '必填', trigger: 'blur'}]
 })
 </script>
 
